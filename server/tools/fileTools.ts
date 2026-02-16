@@ -50,6 +50,27 @@ export const fileToolsDeclarations = [
   },
 ];
 
+export const openAiFileToolsDeclarations = fileToolsDeclarations.map(tool => ({
+  type: "function" as const,
+  function: {
+    name: tool.name,
+    description: tool.description,
+    parameters: {
+      type: "object",
+      properties: Object.fromEntries(
+        Object.entries(tool.parameters.properties).map(([key, value]) => [
+          key,
+          {
+            type: (value as any).type.toLowerCase(),
+            description: (value as any).description,
+          },
+        ])
+      ),
+      required: tool.parameters.required,
+    },
+  },
+}));
+
 export const fileToolImplementations: Record<string, Function> = {
   read_file: async ({ file_path }: { file_path: string }) => {
     try {

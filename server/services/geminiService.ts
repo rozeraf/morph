@@ -3,13 +3,9 @@ import {
   fileToolsDeclarations,
   fileToolImplementations,
 } from "../tools/fileTools";
+import { ChatMessage, AIService } from "../types";
 
-interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-}
-
-export class GeminiService {
+export class GeminiService implements AIService {
   private genAI: GoogleGenerativeAI;
   private model: any;
 
