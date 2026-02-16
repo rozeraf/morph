@@ -73,8 +73,7 @@ export const fileToolImplementations: Record<string, Function> = {
     try {
       const fullPath = path.resolve(process.cwd(), dir_path || ".");
       const files = await fs.readdir(fullPath, { withFileTypes: true });
-      return files.map(f => `${f.isDirectory() ? '[DIR] ' : ''}${f.name}`).join('
-');
+      return files.map(f => `${f.isDirectory() ? '[DIR] ' : ''}${f.name}`).join('\n');
     } catch (e: any) {
       return `Error listing files: ${e.message}`;
     }

@@ -1,8 +1,11 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { fileToolsDeclarations, fileToolImplementations } from '../tools/fileTools';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import {
+  fileToolsDeclarations,
+  fileToolImplementations,
+} from "../tools/fileTools";
 
 interface ChatMessage {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
 }
 
@@ -13,7 +16,7 @@ export class GeminiService {
   constructor(apiKey: string) {
     this.genAI = new GoogleGenerativeAI(apiKey);
     this.model = this.genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
+      model: "gemini-3-flash-preview",
       tools: [{ functionDeclarations: fileToolsDeclarations }],
       systemInstruction: `Вы — ИИ-архитектор этого веб-сайта. 
 Ваша задача — дорабатывать и изменять код проекта по запросу пользователя.
@@ -25,13 +28,14 @@ export class GeminiService {
 
   async chat(messages: ChatMessage[]) {
     const history = messages.slice(0, -1).map((m) => ({
-      role: m.role === 'assistant' ? 'model' : 'user',
+      role: m.role === "assistant" ? "model" : "user",
       parts: [{ text: m.content }],
     }));
 
     // Убеждаемся, что история начинается с user
-    const firstUserIndex = history.findIndex((m) => m.role === 'user');
-    const cleanHistory = firstUserIndex !== -1 ? history.slice(firstUserIndex) : [];
+    const firstUserIndex = history.findIndex((m) => m.role === "user");
+    const cleanHistory =
+      firstUserIndex !== -1 ? history.slice(firstUserIndex) : [];
 
     const chat = this.model.startChat({
       history: cleanHistory,
@@ -47,14 +51,16 @@ export class GeminiService {
       const responses = await Promise.all(
         functionCalls.map(async (call: any) => {
           const fn = fileToolImplementations[call.name];
-          const result = await (fn ? fn(call.args) : `Function ${call.name} not found`);
+          const result = await (fn
+            ? fn(call.args)
+            : `Function ${call.name} not found`);
           return {
             functionResponse: {
               name: call.name,
               response: { result },
             },
           };
-        })
+        }),
       );
 
       result = await chat.sendMessage(responses);

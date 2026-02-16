@@ -1,73 +1,64 @@
-# React + TypeScript + Vite
+# Morph: Self-Evolving Local Development Framework
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Morph** — это программная среда для создания веб-приложений, способных к автономной модификации собственного исходного кода. Система интегрирует возможности больших языковых моделей (LLM) непосредственно в цикл разработки, позволяя изменять архитектуру и интерфейс приложения в режиме реального времени через локальную инфраструктуру.
 
-Currently, two official plugins are available:
+## Архитектура системы
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Проект реализует концепцию "AI-in-the-loop", где искусственный интеллект выступает в роли активного соавтора кода. Взаимодействие происходит следующим образом:
 
-## React Compiler
+1.  **Интерфейс управления**: Специализированный UI-компонент принимает высокоуровневые инструкции от пользователя.
+2.  **Обработка запросов (Backend)**: Сервер на базе Express транслирует запросы к модели Gemini, дополняя их контекстом файловой системы.
+3.  **Механизм инструментов (Function Calling)**: Модель использует строго определенные методы для исследования структуры проекта, чтения содержимого файлов и внесения изменений.
+4.  **Живая среда выполнения**: Внесенные изменения применяются мгновенно, позволяя сразу оценить результат работы ИИ-агента в браузере.
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+## Ключевые возможности
 
-## Expanding the ESLint configuration
+*   **Автономное редактирование**: ИИ-агент имеет полномочия на чтение и перезапись файлов проекта (`.tsx`, `.css`, `.ts`).
+*   **Контекстная осведомленность**: Система анализирует существующую структуру кода перед внесением правок, соблюдая установленные паттерны проектирования.
+*   **Локальное развертывание**: Все операции по модификации файлов происходят на локальной машине разработчика.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Стек технологий
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+*   **Frontend**: React 19, Vite, TypeScript.
+*   **Backend**: Node.js / Bun, Express.
+*   **AI Integration**: Google Generative AI SDK (Gemini 2.0 Flash).
+*   **Dev Tools**: ESLint, PostCSS, Concurrent execution.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Порядок установки и запуска
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Предварительные требования
+*   Установленная среда выполнения **Bun** (рекомендуется) или **Node.js** (версии 18+).
+*   Ключ API для Google Gemini.
+
+### Установка зависимостей
+```bash
+git clone <repository-url>
+cd morph
+bun install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Настройка конфигурации
+Создайте файл `.env` в корневом каталоге и укажите необходимые параметры:
+```env
+GEMINI_API_KEY=your_api_key_here
+PORT=3001
 ```
+
+### Запуск проекта в режиме разработки
+Для одновременного запуска клиентской части и сервера автоматизации выполните:
+```bash
+bun dev:all
+```
+Приложение будет доступно по адресу `http://localhost:5173`.
+
+## Структура каталогов
+
+*   `/server` — Логика серверной части и определения инструментов для ИИ.
+*   `/src` — Исходный код клиентского приложения.
+*   `/src/components/AIAgent.tsx` — Интерактивный терминал управления агентом.
+
+## Безопасность и контроль
+Использование данного инструмента подразумевает предоставление LLM прав на запись в локальной файловой системе. Настоятельно рекомендуется:
+1. Использовать системы контроля версий (Git) для отслеживания изменений.
+2. Проверять внесенные агентом правки перед их фиксацией.
+3. Не хранить чувствительные данные в открытом виде в директориях проекта.
